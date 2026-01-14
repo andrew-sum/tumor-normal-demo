@@ -13,7 +13,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { NATERA-DEMO  } from './workflows/natera-demo'
+include { NATERA_DEMO  } from './workflows/natera-demo'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
@@ -38,7 +38,7 @@ params.fasta = getGenomeAttribute('fasta')
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow ANDREW_NATERA-DEMO {
+workflow ANDREW_NATERA_DEMO {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -48,11 +48,11 @@ workflow ANDREW_NATERA-DEMO {
     //
     // WORKFLOW: Run pipeline
     //
-    NATERA-DEMO (
+    NATERA_DEMO (
         samplesheet
     )
     emit:
-    multiqc_report = NATERA-DEMO.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = NATERA_DEMO.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,7 +81,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    ANDREW_NATERA-DEMO (
+    ANDREW_NATERA_DEMO (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
@@ -90,7 +90,7 @@ workflow {
     PIPELINE_COMPLETION (
         params.outdir,
         params.monochrome_logs,
-        ANDREW_NATERA-DEMO.out.multiqc_report
+        ANDREW_NATERA_DEMO.out.multiqc_report
     )
 }
 

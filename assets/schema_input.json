@@ -7,27 +7,52 @@
     "items": {
         "type": "object",
         "properties": {
+            "patient": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Patient ID must be provided and cannot contain spaces",
+                "meta": ["patient"]
+            },
+            "sex": {
+                "type": "string",
+                "pattern": "^(XX|XY|NA)$",
+                "errorMessage": "Sex must be XX, XY, or NA",
+                "meta": ["sex"]
+            },
+            "status": {
+                "type": "integer",
+                "enum": [0, 1],
+                "errorMessage": "Status must be 0 (normal) or 1 (tumor)",
+                "meta": ["status"]
+            },
             "sample": {
                 "type": "string",
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
+            "lane": {
+                "anyOf": [
+                    {"type": "string"},
+                    {"type": "integer"}
+                ],
+                "meta": ["lane"]
+            },
             "fastq_1": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
+                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             },
             "fastq_2": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
+                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["patient", "sample", "status", "fastq_1"]
     }
 }

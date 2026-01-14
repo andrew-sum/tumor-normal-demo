@@ -1,10 +1,12 @@
 # Implementation Todos
 
-## 0. Input Schema Setup
-- [ ] Update `assets/schema_input.json` with sarek-compatible columns:
+## 0. Input Schema Setup ✅
+- [x] Update `assets/schema_input.json` with sarek-compatible columns:
   - patient, sex, status, sample, lane, fastq_1, fastq_2
-- [ ] Update samplesheet validation in `subworkflows/local/utils_nfcore_natera-demo_pipeline/`
-- [ ] Create test samplesheet `assets/samplesheet_test.csv` (HCC1395 data)
+- [x] Update samplesheet validation in `subworkflows/local/utils_nfcore_natera-demo_pipeline/`
+- [x] Create test samplesheet `assets/samplesheet_test.csv` (HCC1395 data)
+- [x] Fix workflow naming (NATERA-DEMO → NATERA_DEMO)
+- [x] Test pipeline with FastQC - **PASSED**
 
 ---
 
