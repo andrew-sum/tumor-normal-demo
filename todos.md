@@ -10,17 +10,17 @@
 
 ---
 
-## 1. FASTQ_TRIM_QC
+## 1. FASTQ_TRIM_QC ✅
 **Path**: `subworkflows/local/fastq_trim_qc/main.nf`
 
 **Modules to install**:
-- [ ] (fastqc already installed)
-- [ ] `nf-core modules install fastp`
+- [x] (fastqc already installed)
+- [x] `nf-core modules install fastp`
 
 **Implementation**:
-- [ ] Create subworkflow: FASTQC → FASTP
-- [ ] Configure in `conf/modules.config`
-- [ ] Test subworkflow independently
+- [x] Create subworkflow: FASTQC → FASTP
+- [x] Configure in `conf/modules.config`
+- [x] Test subworkflow independently
 
 ---
 

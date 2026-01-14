@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
+include { FASTQ_TRIM_QC          } from '../subworkflows/local/fastq_trim_qc/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -19,19 +19,21 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_nate
 workflow NATERA_DEMO {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    ch_reads // channel: [ val(meta), [ path(reads) ] ]
     main:
 
     ch_versions = channel.empty()
     ch_multiqc_files = channel.empty()
+
     //
-    // MODULE: Run FastQC
+    // SUBWORKFLOW: QC and trim raw reads
     //
-    FASTQC (
-        ch_samplesheet
-    )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    FASTQ_TRIM_QC ( ch_reads )
+
+    ch_trimmed_reads = FASTQ_TRIM_QC.out.reads
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_QC.out.fastqc_zip.collect{it[1]})
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_QC.out.fastp_json.collect{it[1]})
+    ch_versions = ch_versions.mix(FASTQ_TRIM_QC.out.versions)
 
     //
     // Collate and save software versions
@@ -92,7 +94,9 @@ workflow NATERA_DEMO {
         []
     )
 
-    emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    emit:
+    trimmed_reads  = ch_trimmed_reads            // channel: [ val(meta), [ path(reads) ] ]
+    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
 }
