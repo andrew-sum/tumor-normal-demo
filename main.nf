@@ -17,7 +17,9 @@ include { NATERA_DEMO  } from './workflows/natera-demo'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
-include { BWAMEM2_INDEX           } from './modules/nf-core/bwamem2/index/main'
+include { BWAMEM2_INDEX                  } from './modules/nf-core/bwamem2/index/main'
+include { SAMTOOLS_FAIDX                 } from './modules/nf-core/samtools/faidx/main'
+include { GATK4_CREATESEQUENCEDICTIONARY } from './modules/nf-core/gatk4/createsequencedictionary/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,12 +63,54 @@ workflow ANDREW_NATERA_DEMO {
     }
 
     //
+    // Generate FASTA index (.fai) if not provided
+    //
+    if (params.fasta_fai) {
+        ch_fai = Channel.fromPath(params.fasta_fai).map { [[id: 'reference'], it] }.collect()
+    } else {
+        SAMTOOLS_FAIDX(ch_fasta, [[],[]], false)
+        ch_fai = SAMTOOLS_FAIDX.out.fai
+    }
+
+    //
+    // Generate sequence dictionary (.dict) if not provided
+    //
+    if (params.dict) {
+        ch_dict = Channel.fromPath(params.dict).map { [[id: 'reference'], it] }.collect()
+    } else {
+        GATK4_CREATESEQUENCEDICTIONARY(ch_fasta)
+        ch_dict = GATK4_CREATESEQUENCEDICTIONARY.out.dict
+    }
+
+    //
+    // Set up known sites for BQSR (optional)
+    //
+    ch_known_sites = params.known_sites
+        ? Channel.fromPath(params.known_sites).map { [[id: 'known_sites'], it] }.collect()
+        : Channel.value([[],[]])
+    ch_known_sites_tbi = params.known_sites_tbi
+        ? Channel.fromPath(params.known_sites_tbi).map { [[id: 'known_sites'], it] }.collect()
+        : Channel.value([[],[]])
+
+    //
+    // Set up intervals (optional)
+    //
+    ch_intervals = params.intervals
+        ? Channel.fromPath(params.intervals).collect()
+        : Channel.value([])
+
+    //
     // WORKFLOW: Run pipeline
     //
     NATERA_DEMO (
         samplesheet,
         ch_fasta,
-        ch_bwamem2
+        ch_bwamem2,
+        ch_fai,
+        ch_dict,
+        ch_known_sites,
+        ch_known_sites_tbi,
+        ch_intervals
     )
     emit:
     multiqc_report = NATERA_DEMO.out.multiqc_report // channel: /path/to/multiqc_report.html

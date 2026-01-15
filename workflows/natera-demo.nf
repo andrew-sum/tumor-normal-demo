@@ -5,6 +5,7 @@
 */
 include { FASTQ_TRIM_QC          } from '../subworkflows/local/fastq_trim_qc/main'
 include { FASTQ_ALIGN            } from '../subworkflows/local/fastq_align/main'
+include { BAM_MARKDUP_BQSR       } from '../subworkflows/local/bam_markdup_bqsr/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -20,9 +21,14 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_nate
 workflow NATERA_DEMO {
 
     take:
-    ch_reads    // channel: [ val(meta), [ path(reads) ] ]
-    ch_fasta    // channel: [ val(meta), path(fasta) ]
-    ch_bwamem2  // channel: [ val(meta), path(index) ]
+    ch_reads           // channel: [ val(meta), [ path(reads) ] ]
+    ch_fasta           // channel: [ val(meta), path(fasta) ]
+    ch_bwamem2         // channel: [ val(meta), path(index) ]
+    ch_fai             // channel: [ val(meta), path(fai) ]
+    ch_dict            // channel: [ val(meta), path(dict) ]
+    ch_known_sites     // channel: [ val(meta), path(vcf) ]
+    ch_known_sites_tbi // channel: [ val(meta), path(tbi) ]
+    ch_intervals       // channel: [ path(bed) ]
 
     main:
 
@@ -48,6 +54,30 @@ workflow NATERA_DEMO {
         ch_bwamem2
     )
     ch_versions = ch_versions.mix(FASTQ_ALIGN.out.versions)
+
+    //
+    // SUBWORKFLOW: Mark duplicates and base quality score recalibration
+    //
+    if (!params.skip_markduplicates) {
+        BAM_MARKDUP_BQSR (
+            FASTQ_ALIGN.out.bam_bai,
+            ch_fasta,
+            ch_fai,
+            ch_dict,
+            ch_known_sites,
+            ch_known_sites_tbi,
+            ch_intervals
+        )
+        ch_versions = ch_versions.mix(BAM_MARKDUP_BQSR.out.versions)
+
+        // Add markdup metrics and mosdepth to MultiQC
+        ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUP_BQSR.out.metrics.collect{it[1]})
+        ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUP_BQSR.out.coverage_global.collect{it[1]})
+
+        ch_bam_bai = BAM_MARKDUP_BQSR.out.bam_bai
+    } else {
+        ch_bam_bai = FASTQ_ALIGN.out.bam_bai
+    }
 
     //
     // Collate and save software versions
@@ -110,6 +140,7 @@ workflow NATERA_DEMO {
 
     emit:
     trimmed_reads  = ch_trimmed_reads            // channel: [ val(meta), [ path(reads) ] ]
+    bam_bai        = ch_bam_bai                  // channel: [ val(meta), path(bam), path(bai) ]
     multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 

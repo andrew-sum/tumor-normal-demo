@@ -25,9 +25,39 @@
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
                         "installed_by": ["modules"]
                     },
+                    "gatk4/applybqsr": {
+                        "branch": "master",
+                        "git_sha": "ae8cd884f895585c6799ab4eb6a2c9f44df03336",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/baserecalibrator": {
+                        "branch": "master",
+                        "git_sha": "ae8cd884f895585c6799ab4eb6a2c9f44df03336",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/createsequencedictionary": {
+                        "branch": "master",
+                        "git_sha": "ae8cd884f895585c6799ab4eb6a2c9f44df03336",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/markduplicates": {
+                        "branch": "master",
+                        "git_sha": "ae8cd884f895585c6799ab4eb6a2c9f44df03336",
+                        "installed_by": ["modules"]
+                    },
+                    "mosdepth": {
+                        "branch": "master",
+                        "git_sha": "6832b69ef7f98c54876d6436360b6b945370c615",
+                        "installed_by": ["modules"]
+                    },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/faidx": {
+                        "branch": "master",
+                        "git_sha": "9a48bce39a67e2cb34b8f125fc1d50f0ad98b616",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {

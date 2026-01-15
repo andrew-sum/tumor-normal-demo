@@ -79,6 +79,48 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes/"
+                },
+                "fasta_fai": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to FASTA index file (.fai). If not provided, will be generated from FASTA.",
+                    "fa_icon": "fas fa-file"
+                },
+                "dict": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to sequence dictionary file (.dict). If not provided, will be generated from FASTA.",
+                    "fa_icon": "fas fa-file"
+                },
+                "known_sites": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to known sites VCF for BQSR (e.g., dbSNP). Required for base quality score recalibration.",
+                    "fa_icon": "fas fa-file"
+                },
+                "known_sites_tbi": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to known sites VCF index (.tbi).",
+                    "fa_icon": "fas fa-file"
+                },
+                "intervals": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to target regions BED file (optional, for exome/targeted sequencing).",
+                    "fa_icon": "fas fa-file"
+                },
+                "skip_markduplicates": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip marking duplicates step.",
+                    "fa_icon": "fas fa-fast-forward"
+                },
+                "skip_bqsr": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip base quality score recalibration.",
+                    "fa_icon": "fas fa-fast-forward"
                 }
             }
         },

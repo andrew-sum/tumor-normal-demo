@@ -39,19 +39,22 @@
 
 ---
 
-## 3. BAM_MARKDUP_BQSR
+## 3. BAM_MARKDUP_BQSR ✅
 **Path**: `subworkflows/local/bam_markdup_bqsr/main.nf`
 
 **Modules to install**:
-- [ ] `nf-core modules install gatk4/markduplicates`
-- [ ] `nf-core modules install gatk4/baserecalibrator`
-- [ ] `nf-core modules install gatk4/applybqsr`
-- [ ] `nf-core modules install mosdepth`
+- [x] `nf-core modules install gatk4/markduplicates`
+- [x] `nf-core modules install gatk4/baserecalibrator`
+- [x] `nf-core modules install gatk4/applybqsr`
+- [x] `nf-core modules install mosdepth`
+- [x] `nf-core modules install samtools/faidx` (for generating .fai)
+- [x] `nf-core modules install gatk4/createsequencedictionary` (for generating .dict)
 
 **Implementation**:
-- [ ] Create subworkflow: MARKDUPLICATES → BASERECALIBRATOR → APPLYBQSR → MOSDEPTH
-- [ ] Configure in `conf/modules.config`
-- [ ] Test subworkflow independently
+- [x] Create subworkflow: MARKDUPLICATES → BASERECALIBRATOR → APPLYBQSR → MOSDEPTH
+- [x] Configure in `conf/modules.config`
+- [x] Auto-generate .fai and .dict from FASTA if not provided
+- [x] Test subworkflow - **PASSED** (syntax check)
 
 ---
 
