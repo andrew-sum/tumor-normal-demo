@@ -4,6 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { FASTQ_TRIM_QC          } from '../subworkflows/local/fastq_trim_qc/main'
+include { FASTQ_ALIGN            } from '../subworkflows/local/fastq_align/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -19,7 +20,10 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_nate
 workflow NATERA_DEMO {
 
     take:
-    ch_reads // channel: [ val(meta), [ path(reads) ] ]
+    ch_reads    // channel: [ val(meta), [ path(reads) ] ]
+    ch_fasta    // channel: [ val(meta), path(fasta) ]
+    ch_bwamem2  // channel: [ val(meta), path(index) ]
+
     main:
 
     ch_versions = channel.empty()
@@ -34,6 +38,16 @@ workflow NATERA_DEMO {
     ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_QC.out.fastqc_zip.collect{it[1]})
     ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_QC.out.fastp_json.collect{it[1]})
     ch_versions = ch_versions.mix(FASTQ_TRIM_QC.out.versions)
+
+    //
+    // SUBWORKFLOW: Align reads to reference genome
+    //
+    FASTQ_ALIGN (
+        ch_trimmed_reads,
+        ch_fasta,
+        ch_bwamem2
+    )
+    ch_versions = ch_versions.mix(FASTQ_ALIGN.out.versions)
 
     //
     // Collate and save software versions

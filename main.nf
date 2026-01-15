@@ -17,6 +17,7 @@ include { NATERA_DEMO  } from './workflows/natera-demo'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_natera-demo_pipeline'
+include { BWAMEM2_INDEX           } from './modules/nf-core/bwamem2/index/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,10 +25,9 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_nate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// TODO nf-core: Remove this line if you don't need a FASTA file
-//   This is an example of how to use getGenomeAttribute() to fetch parameters
-//   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
+// Reference genome files from igenomes
+params.fasta   = getGenomeAttribute('fasta')
+params.bwamem2 = getGenomeAttribute('bwamem2')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,10 +46,27 @@ workflow ANDREW_NATERA_DEMO {
     main:
 
     //
+    // Set up reference channels
+    //
+    ch_fasta = params.fasta ? Channel.fromPath(params.fasta).map { [[id: 'reference'], it] }.collect() : Channel.empty()
+
+    //
+    // Build BWA-MEM2 index if not provided
+    //
+    if (params.bwamem2) {
+        ch_bwamem2 = Channel.fromPath(params.bwamem2).map { [[id: 'reference'], it] }.collect()
+    } else {
+        BWAMEM2_INDEX(ch_fasta)
+        ch_bwamem2 = BWAMEM2_INDEX.out.index
+    }
+
+    //
     // WORKFLOW: Run pipeline
     //
     NATERA_DEMO (
-        samplesheet
+        samplesheet,
+        ch_fasta,
+        ch_bwamem2
     )
     emit:
     multiqc_report = NATERA_DEMO.out.multiqc_report // channel: /path/to/multiqc_report.html

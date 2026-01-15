@@ -238,3 +238,4 @@ nextflow run . -profile test,docker     # Test pipeline
 5. Quote all variables in shell blocks
 6. Use `\$` for shell variables, `$` for Nextflow variables
 7. Never hardcode paths - use `params` or `moduleDir`
+8. Use micromamba nextflow environment for nextflow and nf-core modules

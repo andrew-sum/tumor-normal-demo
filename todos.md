@@ -24,18 +24,18 @@
 
 ---
 
-## 2. FASTQ_ALIGN
+## 2. FASTQ_ALIGN ✅
 **Path**: `subworkflows/local/fastq_align/main.nf`
 
 **Modules to install**:
-- [ ] `nf-core modules install bwa/mem2`
-- [ ] `nf-core modules install samtools/sort`
-- [ ] `nf-core modules install samtools/index`
+- [x] `nf-core modules install bwamem2/index`
+- [x] `nf-core modules install bwamem2/mem`
+- [x] `nf-core modules install samtools/index`
 
 **Implementation**:
-- [ ] Create subworkflow: BWA-MEM2 → SAMTOOLS_SORT → SAMTOOLS_INDEX
-- [ ] Configure in `conf/modules.config`
-- [ ] Test subworkflow independently
+- [x] Create subworkflow: BWAMEM2_INDEX → BWAMEM2_MEM → SAMTOOLS_INDEX
+- [x] Configure in `conf/modules.config`
+- [x] Test subworkflow (syntax check passed)
 
 ---
 
