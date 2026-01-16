@@ -121,6 +121,18 @@
                     "default": false,
                     "description": "Skip base quality score recalibration.",
                     "fa_icon": "fas fa-fast-forward"
+                },
+                "skip_variant_calling": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip somatic variant calling with Mutect2.",
+                    "fa_icon": "fas fa-fast-forward"
+                },
+                "skip_cnv_calling": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip CNV calling with CNVkit.",
+                    "fa_icon": "fas fa-fast-forward"
                 }
             }
         },

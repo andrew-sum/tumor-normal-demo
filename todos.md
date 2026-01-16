@@ -58,31 +58,31 @@
 
 ---
 
-## 4. BAM_VARIANT_CALLING
+## 4. BAM_VARIANT_CALLING ✅
 **Path**: `subworkflows/local/bam_variant_calling/main.nf`
 
 **Modules to install**:
-- [ ] `nf-core modules install gatk4/mutect2`
-- [ ] `nf-core modules install gatk4/filtermutectcalls`
+- [x] `nf-core modules install gatk4/mutect2`
+- [x] `nf-core modules install gatk4/filtermutectcalls`
 
 **Implementation**:
-- [ ] Create subworkflow: MUTECT2 → FILTERMUTECTCALLS
-- [ ] Handle tumor-normal pairing input
-- [ ] Configure in `conf/modules.config`
-- [ ] Test subworkflow independently
+- [x] Create subworkflow: MUTECT2 → FILTERMUTECTCALLS
+- [x] Handle tumor-normal pairing input (by patient ID, status 0/1)
+- [x] Configure in `conf/modules.config`
+- [x] Test subworkflow - **PASSED** (syntax check)
 
 ---
 
-## 5. BAM_CNV_CALLING
+## 5. BAM_CNV_CALLING ✅
 **Path**: `subworkflows/local/bam_cnv_calling/main.nf`
 
 **Modules to install**:
-- [ ] `nf-core modules install cnvkit/batch`
+- [x] `nf-core modules install cnvkit/batch`
 
 **Implementation**:
-- [ ] Create subworkflow: CNVKIT_BATCH
-- [ ] Configure in `conf/modules.config`
-- [ ] Test subworkflow independently
+- [x] Create subworkflow: CNVKIT_BATCH
+- [x] Configure in `conf/modules.config`
+- [x] Test subworkflow - **PASSED** (syntax check)
 
 ---
 

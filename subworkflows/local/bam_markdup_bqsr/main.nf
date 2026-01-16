@@ -43,7 +43,6 @@ workflow BAM_MARKDUP_BQSR {
     ch_marked_bam_bai = GATK4_MARKDUPLICATES.out.bam
         .join(GATK4_MARKDUPLICATES.out.bai)
 
-    ch_marked_bam_bai.view()
 
     //
     // BQSR: Only run if not skipped via params

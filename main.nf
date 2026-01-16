@@ -100,6 +100,26 @@ workflow ANDREW_NATERA_DEMO {
         : Channel.value([])
 
     //
+    // Set up germline resource for Mutect2 (optional - e.g., gnomAD)
+    //
+    ch_germline_resource = params.germline_resource
+        ? Channel.fromPath(params.germline_resource).collect()
+        : Channel.empty()
+    ch_germline_resource_tbi = params.germline_resource_tbi
+        ? Channel.fromPath(params.germline_resource_tbi).collect()
+        : Channel.empty()
+
+    //
+    // Set up panel of normals for Mutect2 (optional)
+    //
+    ch_panel_of_normals = params.panel_of_normals
+        ? Channel.fromPath(params.panel_of_normals).collect()
+        : Channel.empty()
+    ch_panel_of_normals_tbi = params.panel_of_normals_tbi
+        ? Channel.fromPath(params.panel_of_normals_tbi).collect()
+        : Channel.empty()
+
+    //
     // WORKFLOW: Run pipeline
     //
     NATERA_DEMO (
@@ -110,7 +130,11 @@ workflow ANDREW_NATERA_DEMO {
         ch_dict,
         ch_known_sites,
         ch_known_sites_tbi,
-        ch_intervals
+        ch_intervals,
+        ch_germline_resource,
+        ch_germline_resource_tbi,
+        ch_panel_of_normals,
+        ch_panel_of_normals_tbi
     )
     emit:
     multiqc_report = NATERA_DEMO.out.multiqc_report // channel: /path/to/multiqc_report.html

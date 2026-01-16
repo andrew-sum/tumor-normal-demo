@@ -6,6 +6,8 @@
 include { FASTQ_TRIM_QC          } from '../subworkflows/local/fastq_trim_qc/main'
 include { FASTQ_ALIGN            } from '../subworkflows/local/fastq_align/main'
 include { BAM_MARKDUP_BQSR       } from '../subworkflows/local/bam_markdup_bqsr/main'
+include { BAM_VARIANT_CALLING    } from '../subworkflows/local/bam_variant_calling/main'
+include { BAM_CNV_CALLING        } from '../subworkflows/local/bam_cnv_calling/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -21,14 +23,18 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_nate
 workflow NATERA_DEMO {
 
     take:
-    ch_reads           // channel: [ val(meta), [ path(reads) ] ]
-    ch_fasta           // channel: [ val(meta), path(fasta) ]
-    ch_bwamem2         // channel: [ val(meta), path(index) ]
-    ch_fai             // channel: [ val(meta), path(fai) ]
-    ch_dict            // channel: [ val(meta), path(dict) ]
-    ch_known_sites     // channel: [ val(meta), path(vcf) ]
-    ch_known_sites_tbi // channel: [ val(meta), path(tbi) ]
-    ch_intervals       // channel: [ path(bed) ]
+    ch_reads                 // channel: [ val(meta), [ path(reads) ] ]
+    ch_fasta                 // channel: [ val(meta), path(fasta) ]
+    ch_bwamem2               // channel: [ val(meta), path(index) ]
+    ch_fai                   // channel: [ val(meta), path(fai) ]
+    ch_dict                  // channel: [ val(meta), path(dict) ]
+    ch_known_sites           // channel: [ val(meta), path(vcf) ]
+    ch_known_sites_tbi       // channel: [ val(meta), path(tbi) ]
+    ch_intervals             // channel: [ path(bed) ]
+    ch_germline_resource     // channel: [ path(vcf) ] - optional gnomAD
+    ch_germline_resource_tbi // channel: [ path(tbi) ] - optional
+    ch_panel_of_normals      // channel: [ path(vcf) ] - optional PoN
+    ch_panel_of_normals_tbi  // channel: [ path(tbi) ] - optional
 
     main:
 
@@ -77,6 +83,47 @@ workflow NATERA_DEMO {
         ch_bam_bai = BAM_MARKDUP_BQSR.out.bam_bai
     } else {
         ch_bam_bai = FASTQ_ALIGN.out.bam_bai
+    }
+
+    //
+    // SUBWORKFLOW: Somatic variant calling with Mutect2
+    //
+    ch_vcf = Channel.empty()
+    ch_vcf_tbi = Channel.empty()
+
+    if (!params.skip_variant_calling) {
+        BAM_VARIANT_CALLING (
+            ch_bam_bai,
+            ch_fasta,
+            ch_fai,
+            ch_dict,
+            ch_germline_resource,
+            ch_germline_resource_tbi,
+            ch_panel_of_normals,
+            ch_panel_of_normals_tbi,
+            ch_intervals
+        )
+        ch_versions = ch_versions.mix(BAM_VARIANT_CALLING.out.versions)
+
+        ch_vcf = BAM_VARIANT_CALLING.out.vcf
+        ch_vcf_tbi = BAM_VARIANT_CALLING.out.tbi
+    }
+
+    //
+    // SUBWORKFLOW: CNV calling with CNVkit
+    //
+    ch_cnv_cns = Channel.empty()
+
+    if (!params.skip_cnv_calling) {
+        BAM_CNV_CALLING (
+            ch_bam_bai,
+            ch_fasta,
+            ch_fai,
+            ch_intervals
+        )
+        ch_versions = ch_versions.mix(BAM_CNV_CALLING.out.versions)
+
+        ch_cnv_cns = BAM_CNV_CALLING.out.cns
     }
 
     //
@@ -141,6 +188,9 @@ workflow NATERA_DEMO {
     emit:
     trimmed_reads  = ch_trimmed_reads            // channel: [ val(meta), [ path(reads) ] ]
     bam_bai        = ch_bam_bai                  // channel: [ val(meta), path(bam), path(bai) ]
+    vcf            = ch_vcf                      // channel: [ val(meta), path(vcf) ]
+    vcf_tbi        = ch_vcf_tbi                  // channel: [ val(meta), path(tbi) ]
+    cnv_cns        = ch_cnv_cns                  // channel: [ val(meta), path(cns) ]
     multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 

@@ -15,6 +15,11 @@
                         "git_sha": "d86336f3e7ae0d5f76c67b0859409769cfeb2af2",
                         "installed_by": ["modules"]
                     },
+                    "cnvkit/batch": {
+                        "branch": "master",
+                        "git_sha": "09223d6de1dab602242c4c57ab2a4599d460e528",
+                        "installed_by": ["modules"]
+                    },
                     "fastp": {
                         "branch": "master",
                         "git_sha": "b8f1de0ac853ae5b56c63450d47438f899c553d0",
@@ -40,9 +45,19 @@
                         "git_sha": "ae8cd884f895585c6799ab4eb6a2c9f44df03336",
                         "installed_by": ["modules"]
                     },
+                    "gatk4/filtermutectcalls": {
+                        "branch": "master",
+                        "git_sha": "ae8cd884f895585c6799ab4eb6a2c9f44df03336",
+                        "installed_by": ["modules"]
+                    },
                     "gatk4/markduplicates": {
                         "branch": "master",
                         "git_sha": "ae8cd884f895585c6799ab4eb6a2c9f44df03336",
+                        "installed_by": ["modules"]
+                    },
+                    "gatk4/mutect2": {
+                        "branch": "master",
+                        "git_sha": "6baf1c4cb0e05d7167c3d9280a03972f7fcbbbcb",
                         "installed_by": ["modules"]
                     },
                     "mosdepth": {
