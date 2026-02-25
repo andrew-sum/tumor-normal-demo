@@ -1,81 +1,87 @@
-# andrew/natera-demo
-
-[![GitHub Actions CI Status](https://github.com/andrew/natera-demo/actions/workflows/nf-test.yml/badge.svg)](https://github.com/andrew/natera-demo/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/andrew/natera-demo/actions/workflows/linting.yml/badge.svg)](https://github.com/andrew/natera-demo/actions/workflows/linting.yml)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
-[![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
+# andrew-sum/tumor-normal-demo
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A525.04.0-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
 [![nf-core template version](https://img.shields.io/badge/nf--core_template-3.5.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.5.1)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Seqera Platform](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Seqera%20Platform-%234256e7)](https://cloud.seqera.io/launch?pipeline=https://github.com/andrew/natera-demo)
 
 ## Introduction
 
-**andrew/natera-demo** is a bioinformatics pipeline that ...
+**andrew-sum/tumor-normal-demo** is a Nextflow bioinformatics pipeline for somatic variant and copy number analysis from matched tumor-normal whole exome or whole genome sequencing data. It takes paired-end FASTQ files for a tumor and matched normal sample, performs read QC, alignment, preprocessing, and calls somatic SNVs/indels and copy number variants.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+**Pipeline steps:**
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. Read QC and trimming ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/), [`fastp`](https://github.com/OpenGEN/fastp))
+2. Alignment to reference genome ([`BWA-MEM2`](https://github.com/bwa-mem2/bwa-mem2))
+3. Duplicate marking ([`GATK MarkDuplicates`](https://gatk.broadinstitute.org/))
+4. Base quality score recalibration — BQSR ([`GATK BaseRecalibrator`](https://gatk.broadinstitute.org/), [`GATK ApplyBQSR`](https://gatk.broadinstitute.org/))
+5. Coverage QC ([`mosdepth`](https://github.com/brentp/mosdepth))
+6. Somatic SNV/indel calling ([`GATK Mutect2`](https://gatk.broadinstitute.org/), [`GATK FilterMutectCalls`](https://gatk.broadinstitute.org/))
+7. Copy number variant calling ([`CNVkit`](https://cnvkit.readthedocs.io/))
+8. Aggregated QC report ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
-> [!NOTE]
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
-
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
-First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
+Prepare a samplesheet `samplesheet.csv` with your tumor-normal pair:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+patient,sex,status,sample,lane,fastq_1,fastq_2
+PATIENT1,XX,0,PATIENT1_normal,1,normal_R1.fastq.gz,normal_R2.fastq.gz
+PATIENT1,XX,1,PATIENT1_tumor,1,tumor_R1.fastq.gz,tumor_R2.fastq.gz
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+- `status`: `0` = normal, `1` = tumor
+- Each row is one sample (or lane); multiple lanes for the same sample are merged automatically
 
--->
-
-Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+Run the pipeline:
 
 ```bash
-nextflow run andrew/natera-demo \
-   -profile <docker/singularity/.../institute> \
+nextflow run andrew-sum/tumor-normal-demo \
+   -profile docker \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir results \
+   --genome GRCh38
 ```
+
+> [!NOTE]
+> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
+### Key parameters
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `--input` | Samplesheet CSV | required |
+| `--outdir` | Output directory | required |
+| `--genome` | Reference genome (iGenomes key) | required |
+| `--intervals` | Target BED file (exome/panel) | optional |
+| `--skip_markduplicates` | Skip duplicate marking + BQSR | false |
+| `--skip_variant_calling` | Skip Mutect2 somatic calling | false |
+| `--skip_cnv_calling` | Skip CNVkit CNV calling | false |
+
+## Output
+
+```
+results/
+├── fastqc/             # Raw read QC
+├── fastp/              # Trimming reports and trimmed reads
+├── alignment/          # Sorted BAM + index
+├── preprocessing/
+│   ├── markduplicates/ # Duplicate metrics
+│   └── recalibrated/   # BQSR BAM + index
+├── reports/mosdepth/   # Coverage summaries
+├── variant_calling/mutect2/  # Somatic VCFs (raw + filtered)
+├── cnv_calling/cnvkit/ # CNV segments, scatter/diagram plots
+├── multiqc/            # Aggregated QC report
+└── pipeline_info/      # Software versions, execution trace
+```
+
 ## Credits
 
-andrew/natera-demo was originally written by Andrew Sum.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
-
-## Contributions and Support
-
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
-
-## Citations
-
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use andrew/natera-demo for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+andrew-sum/tumor-normal-demo was written by Andrew Sum.
 
 This pipeline uses code and infrastructure developed and maintained by the [nf-core](https://nf-co.re) community, reused here under the [MIT license](https://github.com/nf-core/tools/blob/main/LICENSE).
 
